@@ -236,15 +236,61 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
+
+        #fundraising {
+    background-color: #e6f7ff;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+/* Styling untuk form pencairan dana */
+#fundraisingForm {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+#fundraisingForm input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+#fundraisingForm button {
+    padding: 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#fundraisingForm button:hover {
+    background-color: #45a049;
+}
+
+/* Responsif: Mengatur form agar terlihat baik pada perangkat kecil */
+@media screen and (max-width: 768px) {
+    #fundraisingForm {
+        max-width: 100%;
+        padding: 10px;
+    }
+}
     </style>
 </head>
 <body>
 
 <!-- Navbar -->
+<!-- Navbar -->
 <div class="navbar" id="myNavbar">
     <a href="javascript:void(0)" id="homeLink" onclick="showSection('overview')">Home</a>
     <a href="javascript:void(0)" id="loginLink" onclick="showSection('create-account')">Buat Akun / Login</a>
     <a href="javascript:void(0)" id="loanLink" style="display: none;" onclick="showSection('loan-application')">Ajukan Pinjaman</a>
+    <a href="javascript:void(0)" id="fundraisingLink" style="display: none;" onclick="showSection('fundraising')">Pencairan Dana</a>
     <a href="javascript:void(0)" id="logoutLink" style="display: none;" onclick="logout()">Log Out</a>
     <a href="javascript:void(0)" class="icon" onclick="toggleNavbar()">
         <i class="fa fa-bars"></i>
@@ -315,6 +361,10 @@
 
                     <label for="password">Kata Sandi:</label>
                     <input type="password" id="password" required placeholder="Masukkan kata sandi">
+
+                    <label for="password">email:</label>
+                    <input type="text" id="password" required placeholder="Masukan email">
+
 
                     <button type="submit" class="w3-button w3-green">Buat Akun</button>
                 </form>
@@ -426,7 +476,10 @@
                     <th>Alamat</th>
                     <th>NIK</th>
                     <th>Status</th>
+                    <td>jumlah Pinjaman</td>
                     <th>Aksi</th>
+            `;
+        
                 </tr>
             </thead>
             <tbody id="borrower-list">
@@ -435,8 +488,51 @@
         </table>
         </div>
     </div>
+    <div id="fundraising" class="section" style="display:none;">
+    <h2>Pencairan Dana</h2>
+    <p>Masukkan detail pencairan dana Anda di bawah ini:</p>
+    <form id="fundraisingForm" onsubmit="processFundraising(event)">
+        <!-- Input untuk Jumlah Dana -->
+        <label for="amount">Jumlah Dana (Rp):</label>
+        <input type="number" id="amount" name="amount" required>
+        
+        <!-- Input untuk Nama Pemilik Rekening -->
+        <label for="accountHolderName">Nama Pemilik Rekening:</label>
+        <input type="text" id="accountHolderName" name="accountHolderName" required>
+        
+        <!-- Input untuk Nomor Rekening -->
+        <label for="accountNumber">Nomor Rekening:</label>
+        <input type="text" id="accountNumber" name="accountNumber" required>
+        
+        <!-- Dropdown untuk Nama Bank -->
+        <label for="bankName">Nama Bank:</label>
+        <select id="bankName" name="bankName" required>
+            <option value="">Pilih Bank</option>
+            <option value="Bank Mandiri">Bank Mandiri</option>
+            <option value="Bank BRI">Bank BRI</option>
+            <option value="Bank BCA">Bank BCA</option>
+            <option value="Bank CIMB Niaga">Bank CIMB Niaga</option>
+            <option value="Bank BTN">Bank BTN</option>
+            <option value="Bank Danamon">Bank Danamon</option>
+            <option value="Bank Negara Indonesia (BNI)">Bank Negara Indonesia (BNI)</option>
+            <option value="Bank Rakyat Indonesia (BRI)">Bank Rakyat Indonesia (BRI)</option>
+            <option value="Bank Permata">Bank Permata</option>
+            <option value="Bank Bukopin">Bank Bukopin</option>
+            <option value="Bank Panin">Bank Panin</option>
+            <option value="Bank OCBC NISP">Bank OCBC NISP</option>
+            <option value="Bank Maybank">Bank Maybank</option>
+            <option value="Bank Syariah Indonesia (BSI)">Bank Syariah Indonesia (BSI)</option>
+            <option value="Bank Sinarmas">Bank Sinarmas</option>
+        </select>
+        
+        <!-- Tombol Submit -->
+        <button type="submit">Ajukan Pencairan Dana</button>
+    </form>
 
+    <!-- Tombol Download PDF -->
+    <button id="downloadPdf" style="display:none;" onclick="downloadPDF()">Unduh Bukti Pencairan PDF</button>
 </div>
+
 
 <script>
 // Fungsi untuk login
@@ -455,13 +551,15 @@ function login(event) {
         alert('Login berhasil! Selamat datang, ' + user.username);
         showSection('loan-application'); // Menampilkan halaman ajukan pinjaman
         document.getElementById("loanLink").style.display = "block"; // Menampilkan menu Ajukan Pinjaman
+        document.getElementById("fundraisingLink").style.display = "block"; // Menampilkan menu Pencairan Dana
         document.getElementById("homeLink").style.display = "none"; // Menyembunyikan menu Home
         document.getElementById("loginLink").style.display = "none"; // Menyembunyikan menu Login
-        document.getElementById("logoutLink").style.display = "block";
+        document.getElementById("logoutLink").style.display = "block"; // Menampilkan menu Log Out
     } else {
         alert('Nama pengguna atau kata sandi salah!');
     }
 }
+
 
 // Fungsi untuk membuat akun
 function createAccount(event) {
@@ -506,9 +604,11 @@ function toggleForm(form) {
 function logout() {
     showSection('create-account');
     document.getElementById("loanLink").style.display = "none"; // Menyembunyikan menu "Ajukan Pinjaman"
+    document.getElementById("fundraisingLink").style.display = "none";
     document.getElementById("homeLink").style.display = "none"; // Menyembunyikan menu "Home"
     document.getElementById("loginLink").style.display = "block"; // Menampilkan menu "Login"
     document.getElementById("logoutLink").style.display = "block";// menampilkan log out
+    
     alert('Anda telah logout.');
 }
 
@@ -621,13 +721,67 @@ const form = document.getElementById('borrower-form');
     function logout() {
         showSection('create-account');
         document.getElementById("loanLink").style.display = "none";
-        document.getElementById("homeLink").style.display = "none";
+        document.getElementById("homeLink").style.display = "block";
         document.getElementById("loginLink").style.display = "block";
         document.getElementById("logoutLink").style.display = "none";
+        document.getElementById("fundraisingLink").style.display = "none";
+
         alert('Anda telah logout.');
     }
 
-    
+    function showSection(sectionId) {
+    // Sembunyikan semua section
+    let sections = document.querySelectorAll('.section');
+    sections.forEach(section => {
+        section.style.display = 'none';
+    });
+
+    // Tampilkan section yang diminta
+    document.getElementById(sectionId).style.display = 'block';
+}
+
+// Fungsi untuk menangani pengajuan pencairan dana
+function showSection(sectionId) {
+    // Sembunyikan semua section
+    let sections = document.querySelectorAll('.section');
+    sections.forEach(section => {
+        section.style.display = 'none';
+    });
+
+    // Tampilkan section yang diminta
+    document.getElementById(sectionId).style.display = 'block';
+}
+
+// Fungsi untuk menangani pengajuan pencairan dana
+function processFundraising(event) {
+    event.preventDefault(); // Mencegah form agar tidak reload halaman
+
+    // Mengambil data dari form
+    let amount = document.getElementById('amount').value;
+    let accountHolderName = document.getElementById('accountHolderName').value;
+    let accountNumber = document.getElementById('accountNumber').value;
+    let bankName = document.getElementById('bankName').value;
+
+    // Debugging: Menampilkan nilai yang diambil dari form di console
+    console.log("Jumlah Dana:", amount);
+    console.log("Nama Pemilik Rekening:", accountHolderName);
+    console.log("Nomor Rekening:", accountNumber);
+    console.log("Nama Bank:", bankName);
+
+    // Validasi jika semua field sudah diisi
+    if (amount && accountHolderName && accountNumber && bankName) {
+        // Menampilkan informasi pengajuan pencairan dana
+        alert(`Pencairan Dana berhasil:\nJumlah: Rp ${amount}\nNama Pemilik Rekening: ${accountHolderName}\nNomor Rekening: ${accountNumber}\nBank: ${bankName}`);
+        
+        // Menampilkan tombol download PDF
+        document.getElementById('downloadPdf').style.display = 'inline-block';
+    } else {
+        // Jika ada field yang kosong, tampilkan peringatan
+        alert('Semua kolom harus diisi!');
+    }
+}
+
+
 </script>
 
 </body>
